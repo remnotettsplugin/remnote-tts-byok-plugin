@@ -1,4 +1,4 @@
-// CODE MODIFIED AS PER USER REQUEST TO USE level: "ReadCreateModifyDelete"
+// FINAL, CORRECTED AND COMPLETE CODE FOR: webpack.config.js
 
 const path = require('path');
 const webpack = require('webpack');
@@ -14,10 +14,14 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
   mode: isProduction ? 'production' : 'development',
+  // ▼▼▼ THE FINAL, CRITICAL FIX IS HERE ▼▼▼
   entry: {
+    // This creates plugin.js for the main logic
     plugin: './src/index.tsx',
+    // This creates widgets.js for the widget logic
     widgets: './src/widgets/index.tsx',
-    settings: './src/settings.tsx' // <-- 确保这一行存在
+    // This critical line creates settings.js for the settings page logic
+    settings: './src/settings.tsx',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -91,7 +95,6 @@ const config = {
               requiredScopes: [
                 {
                   "type": "All",
-                  // ▼▼▼ MODIFIED AS PER YOUR INSTRUCTION ▼▼▼
                   "level": "ReadCreateModifyDelete"
                 }
               ]
