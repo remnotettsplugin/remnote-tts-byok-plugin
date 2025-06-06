@@ -1,8 +1,8 @@
-// CORRECT AND COMPLETE CODE FOR: src/index.tsx
+// CLEANED UP CODE FOR: src/index.tsx
 
-import { App, Plugin, Rem, RichTextInterface } from '@remnote/plugin-sdk';
+import { App, declareIndexPlugin, Plugin, Rem, RichTextInterface } from '@remnote/plugin-sdk';
 
-// 定义插件设置中支持的语言选项
+// 把语言列表也放在这里，因为主逻辑也需要它
 const SUPPORTED_LANGUAGES = [
   { key: 'fr-FR', label: 'French (France)' },
   { key: 'en-US', label: 'English (US)' },
@@ -15,40 +15,7 @@ const SUPPORTED_LANGUAGES = [
 
 async function onActivate(plugin: Plugin) {
 
-  // --- 1. 注册插件的所有设置项 ---
-
-  // a. 后端服务 URL
-  await plugin.settings.registerStringSetting({
-    id: 'backend-url',
-    title: 'Backend Service URL',
-    description: 'The URL of the plugin\'s backend service (deployed on Vercel).',
-    defaultValue: 'https://remnote-byok-backend.vercel.app', 
-  });
-
-  // b. 常用语言选择
-  await plugin.settings.registerMultiSelectSetting({
-    id: 'favorite-languages',
-    title: 'Favorite Languages for TTS Menu',
-    options: SUPPORTED_LANGUAGES,
-    defaultValue: ['fr-FR', 'en-US'],
-  });
-
-  // c. Cloudinary API 密钥
-  await plugin.settings.registerStringSetting({ id: 'cloudinary_cloud_name', title: 'Cloudinary: Cloud Name' });
-  await plugin.settings.registerStringSetting({ id: 'cloudinary_api_key', title: 'Cloudinary: API Key' });
-  await plugin.settings.registerStringSetting({ id: 'cloudinary_api_secret', title: 'Cloudinary: API Secret', sensitive: true });
-
-  // d. Google Cloud API 密钥
-  await plugin.settings.registerStringSetting({ id: 'google_client_email', title: 'Google Cloud: Client Email' });
-  await plugin.settings.registerStringSetting({
-      id: 'google_private_key',
-      title: 'Google Cloud: Private Key',
-      description: 'Copy the full private key from your JSON file, including the BEGIN and END lines.',
-      sensitive: true,
-      multiline: true,
-  });
-
-  // --- 2. 注册命令和弹出菜单 ---
+  // --- 这里只剩下注册命令和弹出菜单的逻辑 ---
 
   await plugin.app.registerCommand({
     id: 'generateTTSForSelection',
@@ -61,7 +28,12 @@ async function onActivate(plugin: Plugin) {
       }
       
       const textContent = RichTextInterface.toString(selectedText);
-      const favLangs = await plugin.settings.getSetting('favorite-languages') as string[];
+      const favLangs = await plugin.settings.getSetting('favorite-languages') as string[] || [];
+
+      if (favLangs.length === 0) {
+        await plugin.app.toast("Please select favorite languages in the plugin settings first.");
+        return;
+      }
 
       await plugin.app.createChoicePopup({
           title: `Generate TTS for "${textContent.substring(0, 25)}..."`,
@@ -129,4 +101,5 @@ async function handleTTSGeneration(plugin: Plugin, text: string, languageCode: s
 
 async function onDeactivate(_: Plugin) {}
 
-export { onActivate, onDeactivate };
+// 使用 declareIndexPlugin 声明这个文件是插件的一个入口
+declareIndexPlugin(onActivate, onDeactivate);

@@ -1,4 +1,4 @@
-// FINAL, DOCUMENTATION-COMPLIANT CODE FOR: webpack.config.js
+// CODE MODIFIED AS PER USER REQUEST TO USE level: "ReadCreateModifyDelete"
 
 const path = require('path');
 const webpack = require('webpack');
@@ -87,16 +87,11 @@ const config = {
               },
               enableOnMobile: false,
               requestNative: false,
-              // ▼▼▼ THE FINAL, DOCUMENTATION-VERIFIED FIX IS HERE ▼▼▼
-              // The format is an array of objects with 'scope' and 'permission' keys.
               requiredScopes: [
                 {
-                  "scope": "Document",
-                  "permission": "ReadWrite"
-                },
-                {
-                  "scope": "Rem",
-                  "permission": "ReadWrite"
+                  "type": "All",
+                  // ▼▼▼ MODIFIED AS PER YOUR INSTRUCTION ▼▼▼
+                  "level": "ReadCreateModifyDelete"
                 }
               ]
             };
