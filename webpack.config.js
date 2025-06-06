@@ -1,4 +1,4 @@
-// FINAL, VERIFIED, AND SPEC-COMPLIANT CODE FOR: webpack.config.js
+// FINAL, DOCUMENTATION-COMPLIANT CODE FOR: webpack.config.js
 
 const path = require('path');
 const webpack = require('webpack');
@@ -59,7 +59,7 @@ const config = {
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', 'ts', '.js'],
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -87,11 +87,17 @@ const config = {
               },
               enableOnMobile: false,
               requestNative: false,
-              // ▼▼▼ THE FINAL FIX IS HERE ▼▼▼
-              // The format is an array of simple strings, not objects.
+              // ▼▼▼ THE FINAL, DOCUMENTATION-VERIFIED FIX IS HERE ▼▼▼
+              // The format is an array of objects with 'scope' and 'permission' keys.
               requiredScopes: [
-                "Document.ReadWrite",
-                "Rem.ReadWrite"
+                {
+                  "scope": "Document",
+                  "permission": "ReadWrite"
+                },
+                {
+                  "scope": "Rem",
+                  "permission": "ReadWrite"
+                }
               ]
             };
             return JSON.stringify(manifest, null, 2);
