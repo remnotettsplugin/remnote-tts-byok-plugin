@@ -1,8 +1,14 @@
 {
   "private": true,
-  "name": "remnote-plugin-template-react",
-  "version": "0.0.1",
+  "name": "remnote-tts-byok-plugin",
+  "version": "1.0.0",
+  "description": "A plugin to generate TTS audio and IPA for selected text in Remnote.",
+  "author": "TTS",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remnotettsplugin/remnote-tts-byok-plugin"
+  },
   "scripts": {
     "check-types": "tsc",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --color --progress --no-open",
