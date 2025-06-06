@@ -1,119 +1,118 @@
-const { resolve } = require('path');
-var glob = require('glob');
-var path = require('path');
+// FINAL, SPEC-COMPLIANT CODE FOR: webpack.config.js
 
+const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ESBuildMinifyPlugin } = require('esbuild-loader');
-const { ProvidePlugin, BannerPlugin } = require('webpack');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const CopyPlugin = require('copy-webpack-plugin');
+const pkg = require('./package.json');
 
-const isProd = process.env.NODE_ENV === 'production';
-const isDevelopment = !isProd;
-
-const fastRefresh = isDevelopment ? new ReactRefreshWebpackPlugin() : null;
-
-const SANDBOX_SUFFIX = '-sandbox';
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
-  mode: isProd ? 'production' : 'development',
-  entry: glob.sync('./src/widgets/**.tsx').reduce(function (obj, el) {
-    obj[path.parse(el).name] = el;
-    obj[path.parse(el).name + SANDBOX_SUFFIX] = el;
-    return obj;
-  }, {}),
-
-  output: {
-    path: resolve(__dirname, 'dist'),
-    filename: `[name].js`,
-    publicPath: '',
+  mode: isProduction ? 'production' : 'development',
+  entry: {
+    plugin: './src/index.tsx',
+    widgets: './src/widgets/index.tsx',
   },
-  resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+    publicPath: '/',
+  },
+  devServer: {
+    port: 8080,
+    hot: true,
+    allowedHosts: 'all',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
   },
   module: {
     rules: [
       {
-        test: /\.(ts|tsx|jsx|js)?$/,
-        loader: 'esbuild-loader',
-        options: {
-          loader: 'tsx',
-          target: 'es2020',
-          minify: false,
-        },
+        test: /\.(js|jsx|ts|tsx)$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'esbuild-loader',
+            options: {
+              loader: 'tsx',
+              target: 'es2020',
+              sourcemap: isDevelopment,
+            },
+          },
+        ],
       },
       {
-        test: /\.css$/i,
+        test: /\.css$/,
         use: [
-          isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
-          { loader: 'css-loader', options: { url: false } },
+          isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader',
           'postcss-loader',
         ],
+        exclude: /node_modules/,
       },
     ],
   },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+  },
   plugins: [
-    isDevelopment ? undefined : new MiniCssExtractPlugin({
-      filename: '[name].css',
-    }),
     new HtmlWebpackPlugin({
-      templateContent: `
-      <body></body>
-      <script type="text/javascript">
-      const urlSearchParams = new URLSearchParams(window.location.search);
-      const queryParams = Object.fromEntries(urlSearchParams.entries());
-      const widgetName = queryParams["widgetName"];
-      if (widgetName == undefined) {document.body.innerHTML+="Widget ID not specified."}
-
-      const s = document.createElement('script');
-      s.type = "module";
-      s.src = widgetName+"${SANDBOX_SUFFIX}.js";
-      document.body.appendChild(s);
-      </script>
-    `,
+      template: './public/index.html',
       filename: 'index.html',
-      inject: false,
+      chunks: ['plugin'],
     }),
-    new ProvidePlugin({
-      React: 'react',
-      reactDOM: 'react-dom',
-    }),
-    new BannerPlugin({
-      banner: (file) => {
-        return !file.chunk.name.includes(SANDBOX_SUFFIX) ? 'const IMPORT_META=import.meta;' : '';
-      },
-      raw: true,
-    }),
-    new CopyPlugin({
+    new CopyWebpackPlugin({
       patterns: [
-        {from: 'public', to: ''},
-        {from: 'README.md', to: ''}
-      ]
+        {
+          from: 'public/manifest.json',
+          to: 'manifest.json',
+          transform(content) {
+            const manifest = {
+              manifestVersion: 1,
+              id: pkg.name,
+              name: pkg.name,
+              author: pkg.author,
+              repoUrl: pkg.repository.url,
+              description: pkg.description,
+              version: {
+                major: parseInt(pkg.version.split('.')[0]),
+                minor: parseInt(pkg.version.split('.')[1]),
+                patch: parseInt(pkg.version.split('.')[2]),
+              },
+              // ▼▼▼ FIX 1: 添加了必需的 'enableOnMobile' 属性 ▼▼▼
+              enableOnMobile: false,
+              requestNative: false,
+              // ▼▼▼ FIX 2: 将 'requiredScopes' 更新为最新的正确格式 ▼▼▼
+              requiredScopes: [
+                {
+                  "type": "Document",
+                  "scope": "ReadWrite"
+                },
+                {
+                  "type": "Rem",
+                  "scope": "ReadWrite"
+                }
+              ]
+            };
+            return JSON.stringify(manifest, null, 2);
+          },
+        },
+      ],
     }),
-    fastRefresh,
+    isDevelopment && new ReactRefreshWebpackPlugin(),
+    isProduction &&
+      new MiniCssExtractPlugin({
+        filename: '[name].css',
+      }),
   ].filter(Boolean),
+  devtool: isDevelopment ? 'cheap-module-source-map' : 'source-map',
+  stats: 'errors-warnings',
 };
-
-if (isProd) {
-  config.optimization = {
-    minimize: isProd,
-    minimizer: [new ESBuildMinifyPlugin()],
-  };
-} else {
-  // for more information, see https://webpack.js.org/configuration/dev-server
-  config.devServer = {
-    port: 8080,
-    open: true,
-    hot: true,
-    compress: true,
-    watchFiles: ['src/*'],
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      "Access-Control-Allow-Headers": "baggage, sentry-trace"
-    },
-  };
-}
 
 module.exports = config;
