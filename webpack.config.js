@@ -1,4 +1,4 @@
-// FINAL, SPEC-COMPLIANT CODE FOR: webpack.config.js
+// FINAL, VERIFIED, AND SPEC-COMPLIANT CODE FOR: webpack.config.js
 
 const path = require('path');
 const webpack = require('webpack');
@@ -85,19 +85,13 @@ const config = {
                 minor: parseInt(pkg.version.split('.')[1]),
                 patch: parseInt(pkg.version.split('.')[2]),
               },
-              // ▼▼▼ FIX 1: 添加了必需的 'enableOnMobile' 属性 ▼▼▼
               enableOnMobile: false,
               requestNative: false,
-              // ▼▼▼ FIX 2: 将 'requiredScopes' 更新为最新的正确格式 ▼▼▼
+              // ▼▼▼ THE FINAL FIX IS HERE ▼▼▼
+              // The format is an array of simple strings, not objects.
               requiredScopes: [
-                {
-                  "type": "Document",
-                  "scope": "ReadWrite"
-                },
-                {
-                  "type": "Rem",
-                  "scope": "ReadWrite"
-                }
+                "Document.ReadWrite",
+                "Rem.ReadWrite"
               ]
             };
             return JSON.stringify(manifest, null, 2);
