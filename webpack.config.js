@@ -1,4 +1,4 @@
-// FINAL, CORRECTED AND COMPLETE CODE FOR: webpack.config.js
+// FINAL, STRUCTURALLY CORRECT CODE FOR: webpack.config.js
 
 const path = require('path');
 const webpack = require('webpack');
@@ -14,13 +14,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
   mode: isProduction ? 'production' : 'development',
-  // ▼▼▼ THE FINAL, CRITICAL FIX IS HERE ▼▼▼
   entry: {
-    // This creates plugin.js for the main logic
     plugin: './src/index.tsx',
-    // This creates widgets.js for the widget logic
     widgets: './src/widgets/index.tsx',
-    // This critical line creates settings.js for the settings page logic
+    // This line is correct, it creates the settings.js script
     settings: './src/settings.tsx',
   },
   output: {
@@ -67,10 +64,18 @@ const config = {
     extensions: ['.tsx', 'ts', '.js'],
   },
   plugins: [
+    // This instance creates the main index.html for the plugin
     new HtmlWebpackPlugin({
       template: './public/index.html',
       filename: 'index.html',
-      chunks: ['plugin'],
+      chunks: ['plugin'], // Only include the plugin.js script
+    }),
+    // ▼▼▼ THE FINAL, CRITICAL FIX IS HERE ▼▼▼
+    // This second instance creates a dedicated settings.html for the settings page
+    new HtmlWebpackPlugin({
+      template: './public/index.html', // We can reuse the same HTML template
+      filename: 'settings.html',      // But we name the output file 'settings.html'
+      chunks: ['settings'],           // And we ONLY include the settings.js script
     }),
     new CopyWebpackPlugin({
       patterns: [
