@@ -17,6 +17,7 @@ const config = {
   entry: {
     plugin: './src/index.tsx',
     widgets: './src/widgets/index.tsx',
+    settings: './src/settings.tsx' // <-- 确保这一行存在
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
