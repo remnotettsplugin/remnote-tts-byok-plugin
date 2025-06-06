@@ -1,4 +1,4 @@
-// FINAL, STRUCTURALLY CORRECT CODE FOR: webpack.config.js
+// FINAL, STRUCTURALLY COMPLETE CODE FOR: webpack.config.js
 
 const path = require('path');
 const webpack = require('webpack');
@@ -17,7 +17,6 @@ const config = {
   entry: {
     plugin: './src/index.tsx',
     widgets: './src/widgets/index.tsx',
-    // This line is correct, it creates the settings.js script
     settings: './src/settings.tsx',
   },
   output: {
@@ -64,18 +63,15 @@ const config = {
     extensions: ['.tsx', 'ts', '.js'],
   },
   plugins: [
-    // This instance creates the main index.html for the plugin
     new HtmlWebpackPlugin({
       template: './public/index.html',
       filename: 'index.html',
-      chunks: ['plugin'], // Only include the plugin.js script
+      chunks: ['plugin'],
     }),
-    // ▼▼▼ THE FINAL, CRITICAL FIX IS HERE ▼▼▼
-    // This second instance creates a dedicated settings.html for the settings page
     new HtmlWebpackPlugin({
-      template: './public/index.html', // We can reuse the same HTML template
-      filename: 'settings.html',      // But we name the output file 'settings.html'
-      chunks: ['settings'],           // And we ONLY include the settings.js script
+      template: './public/index.html',
+      filename: 'settings.html',
+      chunks: ['settings'],
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -94,6 +90,13 @@ const config = {
                 major: parseInt(pkg.version.split('.')[0]),
                 minor: parseInt(pkg.version.split('.')[1]),
                 patch: parseInt(pkg.version.split('.')[2]),
+              },
+              // ▼▼▼ THE FINAL, MISSING PIECE IS HERE ▼▼▼
+              // This object tells Remnote exactly what to load for the settings page.
+              settings: {
+                "url": "settings.html",
+                "height": "auto",
+                "width": "auto"
               },
               enableOnMobile: false,
               requestNative: false,
