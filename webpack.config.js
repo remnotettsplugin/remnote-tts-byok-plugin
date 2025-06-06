@@ -1,4 +1,4 @@
-// FINAL, SIMPLIFIED, AND CORRECTED CODE FOR: webpack.config.js
+// CODE MODIFIED AS PER USER REQUEST TO ENABLE NATIVE MODE
 
 const path = require('path');
 const webpack = require('webpack');
@@ -14,10 +14,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
   mode: isProduction ? 'production' : 'development',
-  // We only need two entry points now.
   entry: {
     plugin: './src/index.tsx',
     widgets: './src/widgets/index.tsx',
+    settings: './src/settings.tsx',
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -63,11 +63,15 @@ const config = {
     extensions: ['.tsx', 'ts', '.js'],
   },
   plugins: [
-    // We only need ONE HtmlWebpackPlugin now.
     new HtmlWebpackPlugin({
       template: './public/index.html',
       filename: 'index.html',
       chunks: ['plugin'],
+    }),
+    new HtmlWebpackPlugin({
+      template: './public/index.html',
+      filename: 'settings.html',
+      chunks: ['settings'],
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -87,9 +91,14 @@ const config = {
                 minor: parseInt(pkg.version.split('.')[1]),
                 patch: parseInt(pkg.version.split('.')[2]),
               },
-              // We remove the settings block entirely, as it's not needed for the simple method.
+              settings: {
+                "url": "settings.html",
+                "height": "auto",
+                "width": "auto"
+              },
               enableOnMobile: false,
-              requestNative: false,
+              // ▼▼▼ MODIFIED AS PER YOUR INSTRUCTION ▼▼▼
+              requestNative: true,
               requiredScopes: [
                 {
                   "type": "All",
